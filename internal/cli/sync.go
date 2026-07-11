@@ -6,15 +6,15 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/paulmach/orb/geojson"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
 	"github.com/BaconFries/meshtastic-poi/internal/config"
-	"github.com/BaconFries/meshtastic-poi/internal/optimizer"
-	"github.com/BaconFries/meshtastic-poi/internal/output"
+	"github.com/BaconFries/meshtastic-poi/internal/model"
+	"github.com/BaconFries/meshtastic-poi/internal/pipeline"
 	"github.com/BaconFries/meshtastic-poi/internal/providers"
 	"github.com/BaconFries/meshtastic-poi/internal/providers/register"
+	"github.com/BaconFries/meshtastic-poi/pkg/engine"
 )
 
 var syncCmd = &cobra.Command{
@@ -32,32 +32,35 @@ var syncCmd = &cobra.Command{
 		deps := providers.Dependencies{CacheDir: cfg.CacheDir}
 		ctx := context.Background()
 
-		collections := make([]*geojson.FeatureCollection, 0, len(cfg.Sources))
+		var all [][]*model.POI
 		for _, src := range cfg.Sources {
 			p, err := registry.Create(src, deps)
 			if err != nil {
 				log.Fatal().Err(err).Str("source", src.Name).Msg("create provider")
 			}
 			log.Info().Str("source", p.Name()).Msg("downloading")
-			fc, err := p.Download(ctx)
+			pois, err := p.Fetch(ctx)
 			if err != nil {
 				log.Fatal().Err(err).Str("source", src.Name).Msg("download failed")
 			}
 
-			report := optimizer.Validate(fc)
+			report := pipeline.ValidateReport(pois)
 			if !report.Valid {
-				log.Warn().Str("source", src.Name).Int("invalid", report.InvalidFeatures).Msg("validation issues found")
+				log.Warn().Str("source", src.Name).Int("invalid", report.InvalidPOIs).Msg("validation issues found")
 			}
 
-			fc = optimizer.Pipeline(fc, optimizer.Options{
+			processed, err := runPipeline(ctx, pois, pipeline.Options{
 				Minimal:     true,
 				Dedupe:      true,
 				RemoveEmpty: true,
 			})
-			collections = append(collections, fc)
+			if err != nil {
+				log.Fatal().Err(err).Str("source", src.Name).Msg("pipeline failed")
+			}
+			all = append(all, processed)
 		}
 
-		merged := output.Merge(collections...)
+		merged := engine.Merge(all...)
 		outDir := cfg.Output.Dir
 		if outDir == "" {
 			outDir = "."
@@ -80,10 +83,10 @@ var syncCmd = &cobra.Command{
 			format = "geojson"
 		}
 		outputFormat = format
-		if err := writeOutput(outPath, merged); err != nil {
+		if err := writePOIs(outPath, merged); err != nil {
 			log.Fatal().Err(err).Msg("write output")
 		}
-		log.Info().Str("output", outPath).Int("features", len(merged.Features)).Msg("sync complete")
-		fmt.Printf("Wrote %d features to %s\n", len(merged.Features), outPath)
+		log.Info().Str("output", outPath).Int("pois", len(merged)).Msg("sync complete")
+		fmt.Printf("Wrote %d POIs to %s\n", len(merged), outPath)
 	},
 }

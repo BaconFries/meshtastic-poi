@@ -7,8 +7,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
+	"github.com/BaconFries/meshtastic-poi/internal/exporters"
+	"github.com/BaconFries/meshtastic-poi/internal/model"
 	"github.com/BaconFries/meshtastic-poi/internal/optimizer"
-	"github.com/BaconFries/meshtastic-poi/internal/output"
 )
 
 var (
@@ -24,11 +25,12 @@ var splitCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		setupLogging(verbose)
-		fc, err := output.ReadGeoJSON(args[0])
+		pois, err := loadPOIs(args[0])
 		if err != nil {
 			log.Fatal().Err(err).Msg("read input")
 		}
 
+		fc := model.ToFeatureCollection(pois)
 		opts := optimizer.SplitOptions{
 			ByField:     splitByField,
 			MaxFeatures: splitMaxFeatures,
@@ -49,10 +51,11 @@ var splitCmd = &cobra.Command{
 			if outputPath != "" && len(groups) == 1 {
 				out = outputPath
 			}
-			if err := output.WriteGeoJSON(out, group); err != nil {
+			groupPOIs := model.FromFeatureCollection(group, "split")
+			if err := exporters.WriteGeoJSONFile(out, groupPOIs); err != nil {
 				log.Fatal().Err(err).Str("output", out).Msg("write failed")
 			}
-			log.Info().Str("output", out).Int("features", len(group.Features)).Msg("wrote split")
+			log.Info().Str("output", out).Int("pois", len(groupPOIs)).Msg("wrote split")
 		}
 	},
 }

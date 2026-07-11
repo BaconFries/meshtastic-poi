@@ -1,10 +1,22 @@
 # Adding a Provider
 
+Providers fetch external data and convert it into the canonical `model.POI` type.
+
 ## Steps
 
 1. Create a package under `internal/providers/<name>/`
 2. Implement the `Provider` interface from `internal/providers`
 3. Register the factory in `internal/providers/register/register.go`
+
+## Interface
+
+```go
+type Provider interface {
+    Name() string
+    Metadata(context.Context) (*DatasetInfo, error)
+    Fetch(context.Context) ([]*model.POI, error)
+}
+```
 
 ## Example Skeleton
 
@@ -13,7 +25,7 @@ package myprovider
 
 import (
     "context"
-    "github.com/paulmach/orb/geojson"
+    "github.com/BaconFries/meshtastic-poi/internal/model"
     "github.com/BaconFries/meshtastic-poi/internal/providers"
 )
 
@@ -27,13 +39,13 @@ func New(cfg providers.SourceConfig, deps providers.Dependencies) (providers.Pro
 
 func (p *Provider) Name() string { return p.cfg.Name }
 
-func (p *Provider) Download(ctx context.Context) (*geojson.FeatureCollection, error) {
-    // Fetch and convert to GeoJSON
+func (p *Provider) Fetch(ctx context.Context) ([]*model.POI, error) {
+    // Fetch external data and convert to []*model.POI
     return nil, nil
 }
 
-func (p *Provider) Metadata(ctx context.Context) (*providers.Metadata, error) {
-    return &providers.Metadata{Name: p.Name(), Type: "myprovider"}, nil
+func (p *Provider) Metadata(ctx context.Context) (*providers.DatasetInfo, error) {
+    return &providers.DatasetInfo{Name: p.Name(), Type: "myprovider"}, nil
 }
 ```
 
@@ -45,8 +57,6 @@ r.Register("myprovider", myprovider.New)
 
 ## Configuration
 
-Users reference your provider in `config.yaml`:
-
 ```yaml
 sources:
   - name: My Data
@@ -56,10 +66,6 @@ sources:
       custom_option: value
 ```
 
-## Shared Dependencies
-
-Use `providers.Dependencies` for cache directory and future shared services (HTTP client, etc.).
-
 ## Testing
 
-Add unit tests with `httptest` mock servers. See `internal/providers/arcgis/arcgis_test.go` for pagination examples.
+Add unit tests with `httptest` mock servers. See `internal/providers/arcgis/arcgis_test.go`.

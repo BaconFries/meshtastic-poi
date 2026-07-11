@@ -1,32 +1,41 @@
-# Adding an Output Format
+# Adding an Exporter
+
+Exporters write canonical POI datasets to external formats. They must not depend on provider types.
 
 ## Steps
 
-1. Add a writer in `internal/output/<format>.go`
-2. Wire the format into `internal/cli/optimize.go` `writeOutput()`
-3. Optionally add config support in `internal/config/config.go`
+1. Add an exporter in `internal/exporters/<format>.go`
+2. Implement the `Exporter` interface
+3. Register in `internal/exporters/register.go`
+4. Wire into CLI via `--format` flag
+
+## Interface
+
+```go
+type Exporter interface {
+    Name() string
+    Export(context.Context, []*model.POI, io.Writer) error
+}
+```
 
 ## Example
 
 ```go
-func WriteCSV(path string, fc *geojson.FeatureCollection) error {
-    // Convert features to CSV rows
+type MyFormat struct{}
+
+func (MyFormat) Name() string { return "myformat" }
+
+func (MyFormat) Export(ctx context.Context, pois []*model.POI, w io.Writer) error {
+    for _, p := range pois {
+        // serialize p
+    }
     return nil
 }
 ```
 
-## CLI Integration
-
-Extend the `writeOutput` switch in `internal/cli/optimize.go`:
-
-```go
-case "csv":
-    return output.WriteCSV(path, fc)
-```
-
 ## Meshtastic Format
 
-The Meshtastic exporter (`internal/output/meshtastic.go`) converts point features to:
+The Meshtastic exporter converts POIs to:
 
 ```json
 {
@@ -42,8 +51,13 @@ The Meshtastic exporter (`internal/output/meshtastic.go`) converts point feature
 }
 ```
 
-Non-point geometries use centroid coordinates.
+## Built-in Exporters
 
-## Future Formats
-
-Planned: CSV, Garmin POI, GPX, KML. Each should live in `internal/output/` with a consistent `Write<Format>(path, fc)` signature.
+| Name | Status |
+|------|--------|
+| `geojson` | Complete |
+| `meshtastic` | Complete |
+| `csv` | Complete |
+| `gpx` | Stub (waypoints) |
+| `kml` | Stub (points) |
+| `garmin` | Stub (CSV) |

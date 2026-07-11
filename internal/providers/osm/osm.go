@@ -11,6 +11,7 @@ import (
 	"github.com/paulmach/orb/geojson"
 
 	"github.com/BaconFries/meshtastic-poi/internal/downloader"
+	"github.com/BaconFries/meshtastic-poi/internal/model"
 	"github.com/BaconFries/meshtastic-poi/internal/providers"
 )
 
@@ -67,28 +68,23 @@ func (p *Provider) Name() string {
 	return "osm"
 }
 
-func (p *Provider) Metadata(ctx context.Context) (*providers.Metadata, error) {
-	fc, err := p.Download(ctx)
+func (p *Provider) Metadata(ctx context.Context) (*providers.DatasetInfo, error) {
+	pois, err := p.Fetch(ctx)
 	if err != nil {
 		return nil, err
 	}
-	geomType := ""
-	if len(fc.Features) > 0 && fc.Features[0].Geometry != nil {
-		geomType = fc.Features[0].Geometry.GeoJSONType()
-	}
-	return &providers.Metadata{
-		Name:         p.Name(),
-		Type:         "osm",
-		URL:          p.cfg.URL,
-		FeatureCount: len(fc.Features),
-		GeometryType: geomType,
+	return &providers.DatasetInfo{
+		Name:     p.Name(),
+		Type:     "osm",
+		URL:      p.cfg.URL,
+		POICount: len(pois),
 		Extra: map[string]any{
 			"query": p.overpassQuery(),
 		},
 	}, nil
 }
 
-func (p *Provider) Download(ctx context.Context) (*geojson.FeatureCollection, error) {
+func (p *Provider) Fetch(ctx context.Context) ([]*model.POI, error) {
 	query := p.overpassQuery()
 	if query == "" {
 		return nil, fmt.Errorf("osm provider requires params.query or bbox with params.tags")
@@ -116,7 +112,7 @@ func (p *Provider) Download(ctx context.Context) (*geojson.FeatureCollection, er
 		}
 		fc.Features = append(fc.Features, f)
 	}
-	return fc, nil
+	return model.FromFeatureCollection(fc, p.Name()), nil
 }
 
 func (p *Provider) overpassQuery() string {

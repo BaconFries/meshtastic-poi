@@ -2,77 +2,82 @@
 
 ## Overview
 
-`meshtastic-poi` is structured as a reusable GIS toolkit with clear separation between data acquisition, processing, spatial operations, and output.
+`meshtastic-poi` is a provider-agnostic offline POI management engine. All data flows through a canonical internal model; no pipeline stage or exporter depends on where data originated.
+
+```
+               Providers
+      ArcGIS  OSM  GPX  CSV  KML  Garmin
+            │
+            ▼
+      Canonical POI Model  (internal/model)
+            │
+            ▼
+        Processing Pipeline  (internal/pipeline)
+            │
+            ▼
+ GeoJSON  Meshtastic  CSV  GPX  KML  Garmin
+         (internal/exporters)
+```
+
+## Packages
 
 ```
 cmd/meshtastic-poi/     CLI entrypoint (Cobra)
 internal/
-  cli/                  Command handlers
-  config/               Viper YAML configuration
-  providers/            Provider interface + registry
-    arcgis/             ArcGIS FeatureServer implementation
-    geojson/            GeoJSON URL provider
-    csv/                CSV point provider
-    osm/                Overpass API provider
-    gpx/                GPX file/URL provider
-    kml/                KML file/URL provider
-    garmin/             Garmin POI CSV provider
-    source/             Local file and URL reader
-    register/           Provider registration (avoids import cycles)
+  model/                Canonical POI type + conversions
+  pipeline/             Composable Processor stages
+  providers/            Provider interface + implementations
+  exporters/            Format exporters (GeoJSON, Meshtastic, CSV, …)
+  spatial/              POI spatial index (quadtree), filters
+  catalog/              Dataset catalog (~/.config/meshtastic-poi/catalog.yaml)
+  pack/                 POI pack collections
+  config/               Viper YAML/JSON configuration
   downloader/           HTTP client with retries
-  optimizer/            Validation + optimization pipeline
-  spatial/              Quadtree index, filters, split helpers
-  output/               GeoJSON and Meshtastic writers
-pkg/geo/                Public geometry helpers
+pkg/
+  engine/               Public embeddable API
+  geo/                  Geometry helpers
 ```
 
-## Data Flow
-
-```
-Config (YAML)
-    ↓
-Provider.Download()
-    ↓
-geojson.FeatureCollection
-    ↓
-Validate → Optimize → Filter → Split/Merge
-    ↓
-Output (GeoJSON / Meshtastic)
-```
-
-## Provider Interface
+## Canonical POI Model
 
 ```go
-type Provider interface {
-    Name() string
-    Download(ctx context.Context) (*geojson.FeatureCollection, error)
-    Metadata(ctx context.Context) (*Metadata, error)
+type POI struct {
+    ID, Name, Category, Description string
+    Location orb.Point
+    Address string
+    Tags map[string]string
+    Metadata map[string]any
+    Source string
+    Updated time.Time
 }
 ```
 
-Providers are registered via factory functions in `internal/providers/register`. This keeps the core `providers` package free of implementation imports.
+Providers implement `Fetch(ctx) ([]*model.POI, error)`.
+Exporters implement `Export(ctx, pois, io.Writer) error`.
 
-## Spatial Index
+## Processing Pipeline
 
-The spatial package uses `github.com/paulmach/orb/quadtree` for:
+Each stage implements:
 
-- Radius search
-- Bounding box queries
-- Nearest neighbor
-- Duplicate coordinate detection
-
-Features implement `orb.Pointer` via a thin wrapper.
-
-## Optimization Pipeline
-
+```go
+type Processor interface {
+    Name() string
+    Process(ctx context.Context, pois []*model.POI) ([]*model.POI, error)
+}
 ```
-Read → Validate → Remove Invalid → Normalize → Remove Empty Properties
-     → Simplify Properties → Deduplicate → Sort → Write
-```
+
+Default order: remove invalid → normalize → remove empty → compress → dedupe → sort.
 
 ## Design Principles
 
-1. **Provider-agnostic** — No Florida or Meshtastic assumptions in core logic
+1. **Provider-agnostic** — Core engine has no Meshtastic or GeoJSON dependencies
 2. **No CGO** — Pure Go for cross-platform builds
-3. **Linear memory** — Operates on feature slices, avoids unnecessary copies
-4. **Extensible** — New providers and output formats via registration
+3. **Composable** — Pipelines, catalogs, and packs assemble from interfaces
+4. **Embeddable** — Use `pkg/engine` from other Go applications
+5. **Extensible** — Register new providers and exporters without changing core logic
+
+## CLI Commands
+
+`download`, `sync`, `validate`, `stats`, `optimize`, `filter`, `merge`, `split`, `export`, `index`, `catalog`, `pack`, `doctor`, `benchmark`, `providers`
+
+See [CLI Reference](cli-reference.md) for details.

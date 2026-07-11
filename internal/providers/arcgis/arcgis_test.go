@@ -57,12 +57,12 @@ func TestArcGISPagination(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fc, err := p.Download(context.Background())
+	pois, err := p.Fetch(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(fc.Features) != 3 {
-		t.Fatalf("expected 3 features across pages, got %d", len(fc.Features))
+	if len(pois) != 3 {
+		t.Fatalf("expected 3 POIs across pages, got %d", len(pois))
 	}
 
 	meta, err := p.Metadata(context.Background())
@@ -101,11 +101,11 @@ func TestEsriGeometryConversion(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fc, err := p.Download(context.Background())
+	pois, err := p.Fetch(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(fc.Features) != 1 {
-		t.Fatalf("expected 1 feature, got %d", len(fc.Features))
+	if len(pois) != 1 {
+		t.Fatalf("expected 1 POI, got %d", len(pois))
 	}
 }

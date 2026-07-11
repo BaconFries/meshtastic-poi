@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"github.com/BaconFries/meshtastic-poi/internal/optimizer"
+	"github.com/BaconFries/meshtastic-poi/internal/pipeline"
 )
 
 var (
@@ -18,23 +18,17 @@ var (
 
 var validateCmd = &cobra.Command{
 	Use:   "validate [file]",
-	Short: "Validate GeoJSON POI data",
+	Short: "Validate POI data",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		setupLogging(verbose)
-		path := args[0]
-		data, err := os.ReadFile(path)
+		pois, err := loadPOIs(args[0])
 		if err != nil {
 			log.Fatal().Err(err).Msg("read file")
 		}
 
-		report, err := optimizer.ValidateJSON(data)
-		if err != nil && !validateJSON {
-			log.Fatal().Err(err).Msg("invalid geojson")
-		}
-
-		fmtReport := optimizer.FormatReport(report)
-		fmt.Println(fmtReport)
+		report := pipeline.ValidateReport(pois)
+		fmt.Println(pipeline.FormatReport(report))
 
 		if validateJSON || outputPath != "" {
 			out, err := json.MarshalIndent(report, "", "  ")

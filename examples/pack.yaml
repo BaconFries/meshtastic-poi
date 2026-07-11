@@ -1,0 +1,15 @@
+name: Florida Outdoors
+
+sources:
+  - florida-state-parks
+  - florida-boat-ramps
+  - florida-campgrounds
+
+optimizer:
+  dedupe: true
+  minimal: true
+  remove_empty: true
+
+exports:
+  - meshtastic
+  - geojson

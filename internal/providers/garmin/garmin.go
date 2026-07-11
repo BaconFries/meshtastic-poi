@@ -12,6 +12,7 @@ import (
 	"github.com/paulmach/orb/geojson"
 
 	"github.com/BaconFries/meshtastic-poi/internal/downloader"
+	"github.com/BaconFries/meshtastic-poi/internal/model"
 	"github.com/BaconFries/meshtastic-poi/internal/providers"
 	"github.com/BaconFries/meshtastic-poi/internal/providers/source"
 )
@@ -40,29 +41,32 @@ func (p *Provider) Name() string {
 	return "garmin"
 }
 
-func (p *Provider) Metadata(ctx context.Context) (*providers.Metadata, error) {
-	fc, err := p.Download(ctx)
+func (p *Provider) Metadata(ctx context.Context) (*providers.DatasetInfo, error) {
+	pois, err := p.Fetch(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &providers.Metadata{
-		Name:         p.Name(),
-		Type:         "garmin",
-		URL:          p.cfg.URL,
-		FeatureCount: len(fc.Features),
-		GeometryType: "Point",
+	return &providers.DatasetInfo{
+		Name:     p.Name(),
+		Type:     "garmin",
+		URL:      p.cfg.URL,
+		POICount: len(pois),
 		Extra: map[string]any{
 			"format": "garmin_csv",
 		},
 	}, nil
 }
 
-func (p *Provider) Download(ctx context.Context) (*geojson.FeatureCollection, error) {
+func (p *Provider) Fetch(ctx context.Context) ([]*model.POI, error) {
 	body, err := source.Read(ctx, p.client, p.cfg.URL)
 	if err != nil {
 		return nil, fmt.Errorf("read garmin poi: %w", err)
 	}
-	return ParseCSV(body, p.columnMap())
+	fc, err := ParseCSV(body, p.columnMap())
+	if err != nil {
+		return nil, err
+	}
+	return model.FromFeatureCollection(fc, p.Name()), nil
 }
 
 func (p *Provider) columnMap() map[string]string {

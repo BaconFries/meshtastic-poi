@@ -53,12 +53,12 @@ func TestOverpassDownload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fc, err := p.Download(context.Background())
+	fc, err := p.Fetch(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(fc.Features) != 2 {
-		t.Fatalf("expected 2 features, got %d", len(fc.Features))
+	if len(fc) != 2 {
+		t.Fatalf("expected 2 features, got %d", len(fc))
 	}
 }
 
@@ -90,11 +90,11 @@ func TestBuildBBoxQuery(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fc, err := p.Download(context.Background())
+	pois, err := p.Fetch(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(fc.Features) != 0 {
-		t.Fatalf("expected empty result, got %d", len(fc.Features))
+	if len(pois) != 0 {
+		t.Fatalf("expected empty result, got %d", len(pois))
 	}
 }

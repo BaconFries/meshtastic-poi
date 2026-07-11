@@ -12,6 +12,7 @@ import (
 	"github.com/paulmach/orb/geojson"
 
 	"github.com/BaconFries/meshtastic-poi/internal/downloader"
+	"github.com/BaconFries/meshtastic-poi/internal/model"
 	"github.com/BaconFries/meshtastic-poi/internal/providers"
 )
 
@@ -100,7 +101,7 @@ func (p *Provider) infoURL() string {
 	return u + "?f=json"
 }
 
-func (p *Provider) Metadata(ctx context.Context) (*providers.Metadata, error) {
+func (p *Provider) Metadata(ctx context.Context) (*providers.DatasetInfo, error) {
 	info, err := p.fetchLayerInfo(ctx)
 	if err != nil {
 		return nil, err
@@ -109,18 +110,28 @@ func (p *Provider) Metadata(ctx context.Context) (*providers.Metadata, error) {
 	for i, f := range info.Fields {
 		fields[i] = f.Name
 	}
-	return &providers.Metadata{
+	return &providers.DatasetInfo{
 		Name:           p.Name(),
 		Type:           "arcgis",
 		URL:            p.cfg.URL,
-		FeatureCount:   info.FeatureCount,
+		POICount:       info.FeatureCount,
 		MaxRecordCount: info.MaxRecordCount,
-		GeometryType:   info.GeometryType,
 		Fields:         fields,
+		Extra: map[string]any{
+			"geometry_type": info.GeometryType,
+		},
 	}, nil
 }
 
-func (p *Provider) Download(ctx context.Context) (*geojson.FeatureCollection, error) {
+func (p *Provider) Fetch(ctx context.Context) ([]*model.POI, error) {
+	fc, err := p.fetchFeatures(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return model.FromFeatureCollection(fc, p.Name()), nil
+}
+
+func (p *Provider) fetchFeatures(ctx context.Context) (*geojson.FeatureCollection, error) {
 	info, err := p.fetchLayerInfo(ctx)
 	if err != nil {
 		return nil, err

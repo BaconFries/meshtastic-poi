@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/BaconFries/meshtastic-poi/internal/config"
-	"github.com/BaconFries/meshtastic-poi/internal/output"
 	"github.com/BaconFries/meshtastic-poi/internal/providers"
 	"github.com/BaconFries/meshtastic-poi/internal/providers/register"
 )
@@ -46,7 +45,7 @@ var downloadCmd = &cobra.Command{
 				log.Fatal().Err(err).Str("source", src.Name).Msg("create provider")
 			}
 			log.Info().Str("source", p.Name()).Msg("downloading")
-			fc, err := p.Download(ctx)
+			pois, err := p.Fetch(ctx)
 			if err != nil {
 				log.Fatal().Err(err).Str("source", src.Name).Msg("download failed")
 			}
@@ -54,10 +53,10 @@ var downloadCmd = &cobra.Command{
 			if out == "" {
 				out = fmt.Sprintf("%s.geojson", sanitize(src.Name))
 			}
-			if err := output.WriteGeoJSON(out, fc); err != nil {
+			if err := writePOIs(out, pois); err != nil {
 				log.Fatal().Err(err).Str("output", out).Msg("write failed")
 			}
-			log.Info().Str("output", out).Int("features", len(fc.Features)).Msg("download complete")
+			log.Info().Str("output", out).Int("pois", len(pois)).Msg("download complete")
 		}
 	},
 }

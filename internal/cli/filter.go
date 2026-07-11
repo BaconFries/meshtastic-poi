@@ -4,7 +4,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"github.com/BaconFries/meshtastic-poi/internal/output"
 	"github.com/BaconFries/meshtastic-poi/internal/spatial"
 )
 
@@ -25,24 +24,24 @@ var filterCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		setupLogging(verbose)
-		fc, err := output.ReadGeoJSON(args[0])
+		pois, err := loadPOIs(args[0])
 		if err != nil {
 			log.Fatal().Err(err).Msg("read input")
 		}
 
-		result := fc
+		result := pois
 		if filterLat != 0 || filterLon != 0 {
 			if filterRadius <= 0 {
 				log.Fatal().Msg("--radius is required for radius filter")
 			}
-			result = spatial.FilterRadius(result, filterLat, filterLon, filterRadius)
+			result = spatial.FilterPOIRadius(result, filterLat, filterLon, filterRadius)
 		}
 		if filterBBox != "" {
 			bbox, err := spatial.ParseBBox(filterBBox)
 			if err != nil {
 				log.Fatal().Err(err).Msg("parse bbox")
 			}
-			result = spatial.FilterBBox(result, bbox[0], bbox[1], bbox[2], bbox[3])
+			result = spatial.FilterPOIBBox(result, bbox[0], bbox[1], bbox[2], bbox[3])
 		}
 
 		attrs := map[string]string{}
@@ -59,17 +58,17 @@ var filterCmd = &cobra.Command{
 			attrs["type"] = filterType
 		}
 		if len(attrs) > 0 {
-			result = spatial.FilterAttributes(result, attrs)
+			result = spatial.FilterPOIAttributes(result, attrs)
 		}
 
 		out := outputPath
 		if out == "" {
 			out = "-"
 		}
-		if err := writeOutput(out, result); err != nil {
+		if err := writePOIs(out, result); err != nil {
 			log.Fatal().Err(err).Msg("write output")
 		}
-		log.Info().Int("features", len(result.Features)).Msg("filter complete")
+		log.Info().Int("pois", len(result)).Msg("filter complete")
 	},
 }
 

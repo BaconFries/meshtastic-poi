@@ -3,19 +3,21 @@ package providers
 import (
 	"context"
 	"fmt"
+	"time"
 
-	"github.com/paulmach/orb/geojson"
+	"github.com/BaconFries/meshtastic-poi/internal/model"
 )
 
-// Metadata describes a provider data source.
-type Metadata struct {
+// DatasetInfo describes a provider dataset.
+type DatasetInfo struct {
 	Name           string         `json:"name"`
 	Type           string         `json:"type"`
 	URL            string         `json:"url,omitempty"`
-	FeatureCount   int            `json:"feature_count,omitempty"`
+	POICount       int            `json:"poi_count,omitempty"`
 	MaxRecordCount int            `json:"max_record_count,omitempty"`
-	GeometryType   string         `json:"geometry_type,omitempty"`
 	Fields         []string       `json:"fields,omitempty"`
+	Checksum       string         `json:"checksum,omitempty"`
+	LastUpdated    time.Time      `json:"last_updated,omitempty"`
 	Extra          map[string]any `json:"extra,omitempty"`
 }
 
@@ -29,11 +31,11 @@ type SourceConfig struct {
 	Params map[string]string `mapstructure:"params"`
 }
 
-// Provider downloads and describes geospatial data sources.
+// Provider fetches geospatial data and converts it to the canonical POI model.
 type Provider interface {
 	Name() string
-	Download(ctx context.Context) (*geojson.FeatureCollection, error)
-	Metadata(ctx context.Context) (*Metadata, error)
+	Metadata(ctx context.Context) (*DatasetInfo, error)
+	Fetch(ctx context.Context) ([]*model.POI, error)
 }
 
 // Factory creates a provider from source configuration.

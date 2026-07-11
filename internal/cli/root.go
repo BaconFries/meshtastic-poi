@@ -15,11 +15,11 @@ var (
 // rootCmd is the base command.
 var rootCmd = &cobra.Command{
 	Use:   "meshtastic-poi",
-	Short: "Download, validate, optimize, and export POI data for Meshtastic",
-	Long: `meshtastic-poi is a cross-platform GIS toolkit for managing Points of Interest.
+	Short: "Offline POI management engine",
+	Long: `meshtastic-poi is a provider-agnostic POI management engine.
 
-It supports multiple data providers (ArcGIS, GeoJSON, CSV, and more), spatial
-filtering, optimization pipelines, and export to GeoJSON and Meshtastic formats.`,
+Data flows through a canonical POI model with pluggable providers,
+composable processing pipelines, and format exporters.`,
 }
 
 // Execute runs the CLI.
@@ -28,9 +28,11 @@ func Execute() error {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&configPath, "config", "", "config file path (YAML)")
+	rootCmd.PersistentFlags().StringVar(&configPath, "config", "", "config file path (YAML or JSON)")
 	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "enable verbose logging")
 	rootCmd.PersistentFlags().StringVarP(&outputPath, "output", "o", "", "output file path")
+
+	initCatalogPack()
 
 	rootCmd.AddCommand(downloadCmd)
 	rootCmd.AddCommand(validateCmd)
@@ -41,6 +43,12 @@ func init() {
 	rootCmd.AddCommand(mergeCmd)
 	rootCmd.AddCommand(syncCmd)
 	rootCmd.AddCommand(providersCmd)
+	rootCmd.AddCommand(exportCmd)
+	rootCmd.AddCommand(indexCmd)
+	rootCmd.AddCommand(catalogCmd)
+	rootCmd.AddCommand(packCmd)
+	rootCmd.AddCommand(doctorCmd)
+	rootCmd.AddCommand(benchmarkCmd)
 }
 
 func exitOnError(err error) {

@@ -12,6 +12,7 @@ import (
 	"github.com/paulmach/orb/geojson"
 
 	"github.com/BaconFries/meshtastic-poi/internal/downloader"
+	"github.com/BaconFries/meshtastic-poi/internal/model"
 	"github.com/BaconFries/meshtastic-poi/internal/providers"
 	"github.com/BaconFries/meshtastic-poi/internal/providers/source"
 )
@@ -37,21 +38,20 @@ func (p *Provider) Name() string {
 	return "csv"
 }
 
-func (p *Provider) Metadata(ctx context.Context) (*providers.Metadata, error) {
-	fc, err := p.Download(ctx)
+func (p *Provider) Metadata(ctx context.Context) (*providers.DatasetInfo, error) {
+	pois, err := p.Fetch(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &providers.Metadata{
-		Name:         p.Name(),
-		Type:         "csv",
-		URL:          p.cfg.URL,
-		FeatureCount: len(fc.Features),
-		GeometryType: "Point",
+	return &providers.DatasetInfo{
+		Name:     p.Name(),
+		Type:     "csv",
+		URL:      p.cfg.URL,
+		POICount: len(pois),
 	}, nil
 }
 
-func (p *Provider) Download(ctx context.Context) (*geojson.FeatureCollection, error) {
+func (p *Provider) Fetch(ctx context.Context) ([]*model.POI, error) {
 	body, err := source.Read(ctx, p.client, p.cfg.URL)
 	if err != nil {
 		return nil, fmt.Errorf("download csv: %w", err)
@@ -111,5 +111,5 @@ func (p *Provider) Download(ctx context.Context) (*geojson.FeatureCollection, er
 		feature.Properties = props
 		fc.Features = append(fc.Features, feature)
 	}
-	return fc, nil
+	return model.FromFeatureCollection(fc, p.Name()), nil
 }

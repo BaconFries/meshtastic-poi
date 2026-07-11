@@ -8,6 +8,7 @@ import (
 	"github.com/paulmach/orb/geojson"
 
 	"github.com/BaconFries/meshtastic-poi/internal/downloader"
+	"github.com/BaconFries/meshtastic-poi/internal/model"
 	"github.com/BaconFries/meshtastic-poi/internal/providers"
 	"github.com/BaconFries/meshtastic-poi/internal/providers/source"
 )
@@ -33,25 +34,20 @@ func (p *Provider) Name() string {
 	return "geojson"
 }
 
-func (p *Provider) Metadata(ctx context.Context) (*providers.Metadata, error) {
-	fc, err := p.Download(ctx)
+func (p *Provider) Metadata(ctx context.Context) (*providers.DatasetInfo, error) {
+	pois, err := p.Fetch(ctx)
 	if err != nil {
 		return nil, err
 	}
-	geomType := ""
-	if len(fc.Features) > 0 && fc.Features[0].Geometry != nil {
-		geomType = fc.Features[0].Geometry.GeoJSONType()
-	}
-	return &providers.Metadata{
-		Name:         p.Name(),
-		Type:         "geojson",
-		URL:          p.cfg.URL,
-		FeatureCount: len(fc.Features),
-		GeometryType: geomType,
+	return &providers.DatasetInfo{
+		Name:     p.Name(),
+		Type:     "geojson",
+		URL:      p.cfg.URL,
+		POICount: len(pois),
 	}, nil
 }
 
-func (p *Provider) Download(ctx context.Context) (*geojson.FeatureCollection, error) {
+func (p *Provider) Fetch(ctx context.Context) ([]*model.POI, error) {
 	body, err := source.Read(ctx, p.client, p.cfg.URL)
 	if err != nil {
 		return nil, fmt.Errorf("download geojson: %w", err)
@@ -60,5 +56,5 @@ func (p *Provider) Download(ctx context.Context) (*geojson.FeatureCollection, er
 	if err := json.Unmarshal(body, &fc); err != nil {
 		return nil, fmt.Errorf("parse geojson: %w", err)
 	}
-	return &fc, nil
+	return model.FromFeatureCollection(&fc, p.Name()), nil
 }
