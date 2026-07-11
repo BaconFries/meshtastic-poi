@@ -4,12 +4,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/BaconFries/meshtastic-poi/internal/output"
+	"github.com/BaconFries/meshtastic-poi/internal/exporters"
 	"github.com/BaconFries/meshtastic-poi/internal/spatial"
 )
 
 func TestFilterRadius(t *testing.T) {
-	fc, err := output.ReadGeoJSON(filepath.Join("..", "..", "testdata", "sample_pois.geojson"))
+	fc, err := exporters.ReadFeatureCollection(filepath.Join("..", "..", "testdata", "sample_pois.geojson"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -28,7 +28,7 @@ func TestFilterRadius(t *testing.T) {
 }
 
 func TestFilterBBox(t *testing.T) {
-	fc, err := output.ReadGeoJSON(filepath.Join("..", "..", "testdata", "sample_pois.geojson"))
+	fc, err := exporters.ReadFeatureCollection(filepath.Join("..", "..", "testdata", "sample_pois.geojson"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,7 +40,7 @@ func TestFilterBBox(t *testing.T) {
 }
 
 func TestFilterAttributes(t *testing.T) {
-	fc, err := output.ReadGeoJSON(filepath.Join("..", "..", "testdata", "sample_pois.geojson"))
+	fc, err := exporters.ReadFeatureCollection(filepath.Join("..", "..", "testdata", "sample_pois.geojson"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func TestHaversineMeters(t *testing.T) {
 }
 
 func TestIndexDuplicateDetection(t *testing.T) {
-	fc, err := output.ReadGeoJSON(filepath.Join("..", "..", "testdata", "dedupe_test.geojson"))
+	fc, err := exporters.ReadFeatureCollection(filepath.Join("..", "..", "testdata", "dedupe_test.geojson"))
 	if err != nil {
 		t.Fatal(err)
 	}

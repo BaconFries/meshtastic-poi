@@ -6,7 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/BaconFries/meshtastic-poi/internal/output"
+	"github.com/BaconFries/meshtastic-poi/internal/exporters"
+	"github.com/BaconFries/meshtastic-poi/internal/model"
 	"github.com/BaconFries/meshtastic-poi/internal/spatial"
 	"github.com/paulmach/orb/geojson"
 )
@@ -83,10 +84,11 @@ func formatBytes(n int64) string {
 
 // StatsFromFile loads a GeoJSON file and computes stats.
 func StatsFromFile(path string) (Stats, error) {
-	fc, err := output.ReadGeoJSON(path)
+	pois, err := exporters.ReadGeoJSONFile(path)
 	if err != nil {
 		return Stats{}, err
 	}
+	fc := model.ToFeatureCollection(pois)
 	var fileSize int64
 	if info, err := os.Stat(path); err == nil {
 		fileSize = info.Size()

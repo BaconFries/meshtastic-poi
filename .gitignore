@@ -1,5 +1,5 @@
 bin/
 *.geojson
 !testdata/*.geojson
-output/
+/output/
 .DS_Store

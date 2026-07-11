@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/BaconFries/meshtastic-poi/internal/exporters"
 	"github.com/BaconFries/meshtastic-poi/internal/optimizer"
-	"github.com/BaconFries/meshtastic-poi/internal/output"
 )
 
 func TestValidateDetectsIssues(t *testing.T) {
@@ -39,7 +39,7 @@ func TestValidateDetectsIssues(t *testing.T) {
 }
 
 func TestPipelineDedupeAndNormalize(t *testing.T) {
-	fc, err := output.ReadGeoJSON(filepath.Join("..", "..", "testdata", "dedupe_test.geojson"))
+	fc, err := exporters.ReadFeatureCollection(filepath.Join("..", "..", "testdata", "dedupe_test.geojson"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestPipelineDedupeAndNormalize(t *testing.T) {
 }
 
 func TestRemoveInvalidFeatures(t *testing.T) {
-	fc, err := output.ReadGeoJSON(filepath.Join("..", "..", "testdata", "sample_pois.geojson"))
+	fc, err := exporters.ReadFeatureCollection(filepath.Join("..", "..", "testdata", "sample_pois.geojson"))
 	if err != nil {
 		t.Fatal(err)
 	}

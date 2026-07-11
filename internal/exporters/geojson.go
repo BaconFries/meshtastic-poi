@@ -42,6 +42,19 @@ func ReadGeoJSONFile(path string) ([]*model.POI, error) {
 	return model.FromFeatureCollection(&fc, "geojson"), nil
 }
 
+// ReadFeatureCollection loads a GeoJSON file preserving original feature geometry.
+func ReadFeatureCollection(path string) (*geojson.FeatureCollection, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var fc geojson.FeatureCollection
+	if err := json.Unmarshal(data, &fc); err != nil {
+		return nil, fmt.Errorf("parse geojson: %w", err)
+	}
+	return &fc, nil
+}
+
 // WriteGeoJSONFile writes POIs to a GeoJSON file or stdout.
 func WriteGeoJSONFile(path string, pois []*model.POI) error {
 	var w io.Writer = os.Stdout
