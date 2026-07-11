@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/paulmach/orb"
@@ -31,7 +32,9 @@ func ToMapLayerFeature(p *POI) *geojson.Feature {
 	}
 	f := geojson.NewFeature(orb.Point{p.Location[0], p.Location[1]})
 	f.Properties = props
-	if id := sanitizeFeatureID(p.ID); id != "" {
+	// Meshtastic-Apple decodes feature id as Int? only; string ids (e.g. "1", "way_123")
+	// pass loose import validation but fail JSONDecoder when rendering overlays.
+	if id, ok := mapLayerFeatureID(p.ID); ok {
 		f.ID = id
 	}
 	return f
@@ -63,19 +66,15 @@ func mapLayerName(p *POI) string {
 	return fmt.Sprintf("POI %.5f,%.5f", p.Location[1], p.Location[0])
 }
 
-func sanitizeFeatureID(id string) string {
+// mapLayerFeatureID returns a numeric GeoJSON feature id when safe for Meshtastic-Apple.
+func mapLayerFeatureID(id string) (float64, bool) {
 	id = strings.TrimSpace(id)
 	if id == "" {
-		return ""
+		return 0, false
 	}
-	id = strings.ReplaceAll(id, "/", "_")
-	id = strings.Map(func(r rune) rune {
-		switch {
-		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9', r == '_', r == '-':
-			return r
-		default:
-			return '_'
-		}
-	}, id)
-	return strings.Trim(id, "_")
+	n, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return 0, false
+	}
+	return float64(n), true
 }

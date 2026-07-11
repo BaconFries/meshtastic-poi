@@ -22,16 +22,30 @@ func TestToMapLayerFeature_PointOnly(t *testing.T) {
 	if f.Geometry.GeoJSONType() != "Point" {
 		t.Fatalf("expected Point, got %s", f.Geometry.GeoJSONType())
 	}
-	if f.ID != "way_1280560257" {
-		t.Fatalf("expected sanitized id, got %v", f.ID)
+	if f.ID != nil {
+		t.Fatalf("expected no id for OSM-style ids, got %v", f.ID)
 	}
 	if f.Properties["marker-color"] != mapLayerMarkerColor {
 		t.Fatalf("expected marker-color, got %v", f.Properties["marker-color"])
 	}
 }
 
-func TestSanitizeFeatureID(t *testing.T) {
-	if got := sanitizeFeatureID("node/10010311085"); got != "node_10010311085" {
-		t.Fatalf("got %q", got)
+func TestToMapLayerFeature_NumericID(t *testing.T) {
+	p := &POI{ID: "42", Name: "Ramp", Location: orb.Point{-82.0, 29.0}}
+	f := ToMapLayerFeature(p)
+	if f == nil {
+		t.Fatal("expected feature")
+	}
+	if f.ID != float64(42) {
+		t.Fatalf("expected numeric id 42, got %v", f.ID)
+	}
+}
+
+func TestMapLayerFeatureID(t *testing.T) {
+	if _, ok := mapLayerFeatureID("node_10010311085"); ok {
+		t.Fatal("expected non-numeric id to be omitted")
+	}
+	if n, ok := mapLayerFeatureID("1001"); !ok || n != 1001 {
+		t.Fatalf("got %v %v", n, ok)
 	}
 }

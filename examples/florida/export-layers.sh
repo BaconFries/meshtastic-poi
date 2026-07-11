@@ -25,13 +25,6 @@ LAYERS=(
   "FL Recreation County"
   "FL Recreation Federal"
   "FL Boat Ramps"
-  "FL OSM Hospitals"
-  "FL OSM Police"
-  "FL OSM Fuel"
-  "FL OSM Camp Sites"
-  "FL OSM Viewpoints"
-  "FL OSM Ranger Stations"
-  "FL OSM Fire Stations"
 )
 
 slug() {

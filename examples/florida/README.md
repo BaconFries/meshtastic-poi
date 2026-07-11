@@ -57,6 +57,8 @@ The Meshtastic app map layer importer expects standard **GeoJSON** (`FeatureColl
 
 Import one `.geojson` file per layer in your Meshtastic app so you can toggle feature types independently. Dense layers (e.g. boat ramps with thousands of points) only show pins once you zoom in to a region.
 
+**Apple (iOS/macOS):** The Meshtastic app decodes feature `id` as an integer only. String ids (including numeric strings like `"1"`) pass file import but fail when the map loads the layer, so nothing appears. The `maplayer` exporter omits non-numeric ids and writes numeric ids as JSON numbers.
+
 ## Export a single layer
 
 ```bash
