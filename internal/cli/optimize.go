@@ -71,7 +71,6 @@ func init() {
 	optimizeCmd.Flags().StringVar(&optKeepFields, "keep-fields", "", "comma-separated fields to keep")
 	optimizeCmd.Flags().Float64Var(&optSortLat, "sort-lat", 0, "reference latitude for distance sort")
 	optimizeCmd.Flags().Float64Var(&optSortLon, "sort-lon", 0, "reference longitude for distance sort")
-	optimizeCmd.Flags().StringVar(&outputFormat, "format", "geojson", "output format")
 }
 
 func splitCSV(s string) []string {

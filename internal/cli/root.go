@@ -31,6 +31,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&configPath, "config", "", "config file path (YAML or JSON)")
 	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "enable verbose logging")
 	rootCmd.PersistentFlags().StringVarP(&outputPath, "output", "o", "", "output file path")
+	rootCmd.PersistentFlags().StringVar(&outputFormat, "format", "geojson", "output format: geojson, meshtastic, csv")
 
 	initCatalogPack()
 

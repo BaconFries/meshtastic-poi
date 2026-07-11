@@ -29,6 +29,21 @@ func (GeoJSON) Export(_ context.Context, pois []*model.POI, w io.Writer) error {
 	return err
 }
 
+// MapLayer exports Point-only GeoJSON with simplestyle marker properties for Meshtastic map overlays.
+type MapLayer struct{}
+
+func (MapLayer) Name() string { return "maplayer" }
+
+func (MapLayer) Export(_ context.Context, pois []*model.POI, w io.Writer) error {
+	fc := model.ToMapLayerFeatureCollection(pois)
+	data, err := json.MarshalIndent(fc, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal maplayer geojson: %w", err)
+	}
+	_, err = w.Write(data)
+	return err
+}
+
 // ReadGeoJSONFile loads POIs from a GeoJSON file.
 func ReadGeoJSONFile(path string) ([]*model.POI, error) {
 	data, err := os.ReadFile(path)

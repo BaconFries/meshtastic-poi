@@ -11,10 +11,7 @@ import (
 	"github.com/BaconFries/meshtastic-poi/internal/pipeline"
 )
 
-var (
-	validateInput string
-	validateJSON  bool
-)
+var validateJSON bool
 
 var validateCmd = &cobra.Command{
 	Use:   "validate [file]",

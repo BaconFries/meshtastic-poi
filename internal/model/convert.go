@@ -9,8 +9,8 @@ import (
 	"github.com/paulmach/orb/geojson"
 )
 
-var nameKeys = []string{"name", "title", "label", "NAME", "Title"}
-var categoryKeys = []string{"type", "category", "TYPE", "Category", "class"}
+var nameKeys = []string{"name", "title", "label", "NAME", "Title", "RampName", "SITE_NAME", "FACILITY_NAME", "PARK_NAME", "POI_NAME"}
+var categoryKeys = []string{"type", "category", "TYPE", "Category", "class", "CATEGORY", "Symbols", "RampType"}
 var descKeys = []string{"description", "desc", "notes", "comment"}
 var addressKeys = []string{"address", "addr", "street", "full_address"}
 var idKeys = []string{"id", "ID", "OBJECTID", "objectid", "fid", "FID", "osm_id"}

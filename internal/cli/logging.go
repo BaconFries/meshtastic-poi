@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"io"
 	"os"
 	"time"
 
@@ -18,8 +17,4 @@ func setupLogging(verbose bool) {
 		Out:        os.Stderr,
 		TimeFormat: time.RFC3339,
 	}).With().Timestamp().Logger().Level(level)
-}
-
-func logWriter() io.Writer {
-	return os.Stderr
 }

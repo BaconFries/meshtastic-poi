@@ -1,4 +1,4 @@
-.PHONY: build test lint clean
+.PHONY: build test lint clean florida-export
 
 build:
 	go build -o bin/meshtastic-poi ./cmd/meshtastic-poi
@@ -15,3 +15,6 @@ clean:
 
 install:
 	go install ./cmd/meshtastic-poi
+
+florida-export: build
+	./examples/florida/export-layers.sh

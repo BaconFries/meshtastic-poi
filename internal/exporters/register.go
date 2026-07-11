@@ -4,6 +4,7 @@ package exporters
 func DefaultRegistry() *Registry {
 	r := NewRegistry()
 	r.Register("geojson", GeoJSON{})
+	r.Register("maplayer", MapLayer{})
 	r.Register("meshtastic", Meshtastic{})
 	r.Register("csv", CSV{})
 	r.Register("gpx", GPX{})

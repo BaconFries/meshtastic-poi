@@ -1,0 +1,112 @@
+# Florida statewide POI layers for Meshtastic import.
+# Each source becomes one importable layer when exported via export-layers.sh.
+#
+# Florida bounding box (approx): minLon, minLat, maxLon, maxLat
+# Used by OSM Overpass sources below.
+
+cache_dir: ~/.cache/meshtastic-poi
+
+output:
+  dir: ./output/florida
+  format: geojson
+
+sources:
+  # --- FDEP State Parks (ArcGIS) ---
+  - name: FL Park POIs
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_BOUNDARIES/MapServer/6
+    where: "1=1"
+
+  - name: FL Park Campgrounds
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_BOUNDARIES/MapServer/1
+    where: "1=1"
+
+  - name: FL Park Entrances
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_BOUNDARIES/MapServer/2
+    where: "1=1"
+
+  - name: FL Park Boundaries
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_BOUNDARIES/MapServer/0
+    where: "1=1"
+
+  # --- Florida Outdoor Recreation Inventory (by manager type) ---
+  - name: FL Recreation State
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_FORI/MapServer/0
+    where: "CATEGORY = 'STATE'"
+
+  - name: FL Recreation County
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_FORI/MapServer/0
+    where: "CATEGORY = 'COUNTY'"
+
+  - name: FL Recreation Federal
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_FORI/MapServer/0
+    where: "CATEGORY = 'FEDERAL'"
+
+  # --- FWC Boating ---
+  - name: FL Boat Ramps
+    type: arcgis
+    url: https://gis.myfwc.com/mapping/rest/services/Open_Data/FWC_Florida_Boat_Ramp_Inventory/MapServer/4
+    where: "1=1"
+
+  # --- OpenStreetMap statewide (Overpass) ---
+  - name: FL OSM Hospitals
+    type: osm
+    url: https://overpass-api.de/api/interpreter
+    bbox: [-87.635, 24.396, -79.974, 31.001]
+    params:
+      tags: amenity=hospital
+      timeout: "180"
+
+  - name: FL OSM Police
+    type: osm
+    url: https://overpass-api.de/api/interpreter
+    bbox: [-87.635, 24.396, -79.974, 31.001]
+    params:
+      tags: amenity=police
+      timeout: "180"
+
+  - name: FL OSM Fuel
+    type: osm
+    url: https://overpass-api.de/api/interpreter
+    bbox: [-87.635, 24.396, -79.974, 31.001]
+    params:
+      tags: amenity=fuel
+      timeout: "180"
+
+  - name: FL OSM Camp Sites
+    type: osm
+    url: https://overpass-api.de/api/interpreter
+    bbox: [-87.635, 24.396, -79.974, 31.001]
+    params:
+      tags: tourism=camp_site
+      timeout: "180"
+
+  - name: FL OSM Viewpoints
+    type: osm
+    url: https://overpass-api.de/api/interpreter
+    bbox: [-87.635, 24.396, -79.974, 31.001]
+    params:
+      tags: tourism=viewpoint
+      timeout: "180"
+
+  - name: FL OSM Ranger Stations
+    type: osm
+    url: https://overpass-api.de/api/interpreter
+    bbox: [-87.635, 24.396, -79.974, 31.001]
+    params:
+      tags: amenity=ranger_station
+      timeout: "180"
+
+  - name: FL OSM Fire Stations
+    type: osm
+    url: https://overpass-api.de/api/interpreter
+    bbox: [-87.635, 24.396, -79.974, 31.001]
+    params:
+      tags: amenity=fire_station
+      timeout: "180"
