@@ -1,0 +1,29 @@
+{
+  "elements": [
+    {
+      "type": "node",
+      "id": 1001,
+      "lat": 28.5383,
+      "lon": -81.3792,
+      "tags": {
+        "amenity": "park",
+        "name": "OSM Test Park"
+      }
+    },
+    {
+      "type": "way",
+      "id": 2001,
+      "tags": {
+        "amenity": "parking",
+        "name": "OSM Test Lot"
+      },
+      "geometry": [
+        {"lat": 28.5380, "lon": -81.3790},
+        {"lat": 28.5390, "lon": -81.3790},
+        {"lat": 28.5390, "lon": -81.3780},
+        {"lat": 28.5380, "lon": -81.3780},
+        {"lat": 28.5380, "lon": -81.3790}
+      ]
+    }
+  ]
+}

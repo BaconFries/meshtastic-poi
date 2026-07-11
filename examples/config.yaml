@@ -1,0 +1,42 @@
+cache_dir: ~/.cache/meshtastic-poi
+
+output:
+  dir: ./output
+  format: geojson
+  filename: combined.geojson
+
+sources:
+  - name: Florida Parks
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_BOUNDARIES/MapServer/0
+    where: "1=1"
+
+  - name: NOAA Weather
+    type: geojson
+    url: https://example.com/noaa-stations.geojson
+
+  - name: Repeaters
+    type: csv
+    url: https://example.com/repeaters.csv
+    params:
+      lat_column: latitude
+      lon_column: longitude
+
+  - name: OSM Parks
+    type: osm
+    url: https://overpass-api.de/api/interpreter
+    bbox: [-82.0, 28.0, -81.0, 29.0]
+    params:
+      tags: amenity=park
+
+  - name: Local GPX Track
+    type: gpx
+    url: testdata/sample.gpx
+
+  - name: Local KML
+    type: kml
+    url: testdata/sample.kml
+
+  - name: Garmin POI
+    type: garmin
+    url: testdata/sample_garmin.csv

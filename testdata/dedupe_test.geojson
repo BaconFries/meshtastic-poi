@@ -1,0 +1,20 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [-81.0, 28.0]},
+      "properties": {"OBJECTID": 1, "name": "Alpha", "Shape_Length": 0, "park": "A"}
+    },
+    {
+      "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [-81.0, 28.0]},
+      "properties": {"OBJECTID": 2, "name": "Alpha Duplicate", "Shape_Length": 0, "park": "A"}
+    },
+    {
+      "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [-82.0, 29.0]},
+      "properties": {"OBJECTID": 3, "name": "Beta", "Shape_Length": 0, "park": "B"}
+    }
+  ]
+}

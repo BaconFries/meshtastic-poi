@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Sample KML</name>
+    <Placemark>
+      <name>Orlando Point</name>
+      <description>Test point</description>
+      <Point>
+        <coordinates>-81.3792,28.5383,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Tampa Line</name>
+      <LineString>
+        <coordinates>
+          -82.4572,27.9506,0 -82.4600,27.9600,0
+        </coordinates>
+      </LineString>
+    </Placemark>
+    <Folder>
+      <name>Nested</name>
+      <Placemark>
+        <name>Miami Point</name>
+        <Point>
+          <coordinates>-80.1918,25.7617,0</coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>

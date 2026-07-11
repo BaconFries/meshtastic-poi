@@ -1,0 +1,67 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-81.3792, 28.5383]
+      },
+      "properties": {
+        "name": "Orlando City Hall",
+        "type": "government",
+        "county": "Orange",
+        "park": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "2",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-81.3792, 28.5383]
+      },
+      "properties": {
+        "name": "Duplicate Orlando",
+        "type": "duplicate",
+        "county": "Orange"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "3",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-82.4572, 27.9506]
+      },
+      "properties": {
+        "name": "Tampa Bay",
+        "type": "landmark",
+        "county": "Hillsborough",
+        "park": "Waterfront"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "4",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-80.1918, 25.7617]
+      },
+      "properties": {
+        "name": "Miami Beach",
+        "type": "beach",
+        "county": "Miami-Dade",
+        "park": "South Beach"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "name": "Invalid Null Geometry"
+      }
+    }
+  ]
+}
