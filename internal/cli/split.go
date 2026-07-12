@@ -52,7 +52,11 @@ var splitCmd = &cobra.Command{
 				out = outputPath
 			}
 			groupPOIs := model.FromFeatureCollection(group, "split")
-			if err := exporters.WriteGeoJSONFile(out, groupPOIs); err != nil {
+			format := outputFormat
+			if format == "" {
+				format = "geojson"
+			}
+			if err := exporters.WriteFile(out, format, groupPOIs); err != nil {
 				log.Fatal().Err(err).Str("output", out).Msg("write failed")
 			}
 			log.Info().Str("output", out).Int("pois", len(groupPOIs)).Msg("wrote split")

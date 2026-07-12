@@ -1,0 +1,63 @@
+# Miami metro POI layers (subset of examples/florida/config.yaml).
+# bbox: minLon, minLat, maxLon, maxLat — Miami-Dade and nearby coastal waters.
+#
+# Covers roughly Homestead north to North Miami / Broward line, Everglades edge
+# to the Atlantic. Adjust bbox in export-layers.sh if you need a tighter box.
+
+cache_dir: ~/.cache/meshtastic-poi
+
+output:
+  dir: ./output/florida-miami
+  format: geojson
+
+# Shared spatial filter for ArcGIS queries (also re-applied after download).
+miami_bbox: &miami_bbox [-80.90, 25.45, -80.05, 26.15]
+
+sources:
+  - name: FL Park POIs
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_BOUNDARIES/MapServer/6
+    where: "1=1"
+    bbox: *miami_bbox
+
+  - name: FL Park Campgrounds
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_BOUNDARIES/MapServer/1
+    where: "1=1"
+    bbox: *miami_bbox
+
+  - name: FL Park Entrances
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_BOUNDARIES/MapServer/2
+    where: "1=1"
+    bbox: *miami_bbox
+
+  - name: FL Park Boundaries
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_BOUNDARIES/MapServer/0
+    where: "1=1"
+    bbox: *miami_bbox
+
+  - name: FL Recreation State
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_FORI/MapServer/0
+    where: "CATEGORY = 'STATE'"
+    bbox: *miami_bbox
+
+  - name: FL Recreation County
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_FORI/MapServer/0
+    where: "CATEGORY = 'COUNTY'"
+    bbox: *miami_bbox
+
+  - name: FL Recreation Federal
+    type: arcgis
+    url: https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_FORI/MapServer/0
+    where: "CATEGORY = 'FEDERAL'"
+    bbox: *miami_bbox
+
+  - name: FL Boat Ramps
+    type: arcgis
+    url: https://gis.myfwc.com/mapping/rest/services/Open_Data/FWC_Florida_Boat_Ramp_Inventory/MapServer/4
+    where: "1=1"
+    bbox: *miami_bbox

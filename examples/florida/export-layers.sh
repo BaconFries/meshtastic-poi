@@ -3,10 +3,19 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-CONFIG="${ROOT}/examples/florida/config.yaml"
-OUT="${ROOT}/output/florida"
 BIN="${ROOT}/bin/meshtastic-poi"
-TMP="${ROOT}/output/florida/.tmp"
+
+# Miami metro bbox: minLon,minLat,maxLon,maxLat
+# Set BBOX= to export statewide (uses config.yaml and output/florida).
+BBOX="${BBOX:--80.90,25.45,-80.05,26.15}"
+if [[ -n "$BBOX" ]]; then
+  CONFIG="${CONFIG:-${ROOT}/examples/florida/config-miami.yaml}"
+  OUT="${OUT:-${ROOT}/output/florida-miami}"
+else
+  CONFIG="${CONFIG:-${ROOT}/examples/florida/config.yaml}"
+  OUT="${OUT:-${ROOT}/output/florida}"
+fi
+TMP="${OUT}/.tmp"
 
 mkdir -p "$OUT" "$TMP"
 
@@ -31,7 +40,17 @@ slug() {
   echo "$1" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-'
 }
 
+# Split statewide exports by field (e.g. county) into per-region files.
+# Example: BBOX= SPLIT_BY=county ./examples/florida/export-layers.sh
+SPLIT_BY="${SPLIT_BY:-}"
+
 echo "Exporting ${#LAYERS[@]} Florida layers to ${OUT}/"
+if [[ -n "$BBOX" ]]; then
+  echo "Spatial filter (bbox): ${BBOX}"
+fi
+if [[ -n "$SPLIT_BY" ]]; then
+  echo "Split by: ${SPLIT_BY} -> ${OUT}/by-${SPLIT_BY}/<layer>/"
+fi
 echo
 
 for name in "${LAYERS[@]}"; do
@@ -41,15 +60,37 @@ for name in "${LAYERS[@]}"; do
   echo "==> ${name}"
   "$BIN" download "$name" --config "$CONFIG" -o "$geo" --verbose
 
-  "$BIN" optimize "$geo" \
-    --dedupe --remove-empty \
-    --format maplayer \
-    -o "${OUT}/${file}"
+  input="$geo"
+  if [[ -n "$BBOX" ]]; then
+    filtered="${TMP}/$(slug "$name")-filtered.geojson"
+    "$BIN" filter "$geo" --bbox "$BBOX" -o "$filtered"
+    input="$filtered"
+  fi
 
-  count=$(python3 -c "import json; print(len(json.load(open('${OUT}/${file}'))['features']))")
-  echo "    ${count} features -> ${OUT}/${file}"
+  if [[ -n "$SPLIT_BY" ]]; then
+    split_dir="${OUT}/by-${SPLIT_BY}/$(slug "$name")"
+    mkdir -p "$split_dir"
+    "$BIN" split "$input" \
+      --by "$SPLIT_BY" \
+      --format maplayer \
+      --output-dir "$split_dir"
+    count=$(python3 -c "import json,glob; print(sum(len(json.load(open(f))['features']) for f in glob.glob('${split_dir}/*.geojson')))")
+    parts=$(find "$split_dir" -name '*.geojson' | wc -l | tr -d ' ')
+    echo "    ${count} features in ${parts} files -> ${split_dir}/"
+  else
+    "$BIN" optimize "$input" \
+      --dedupe --remove-empty \
+      --format maplayer \
+      -o "${OUT}/${file}"
+
+    count=$(python3 -c "import json; print(len(json.load(open('${OUT}/${file}'))['features']))")
+    echo "    ${count} features -> ${OUT}/${file}"
+  fi
   echo
 done
 
 echo "Done. Import each GeoJSON file as a separate map layer in the Meshtastic app."
 echo "Layers written to: ${OUT}/"
+if [[ -n "$SPLIT_BY" ]]; then
+  echo "County (or ${SPLIT_BY}) splits: ${OUT}/by-${SPLIT_BY}/"
+fi
